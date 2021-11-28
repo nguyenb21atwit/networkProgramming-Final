@@ -139,7 +139,7 @@ public class TicTacToeServer {
 			result = checkValidMove(move, gameBoard);
 		}
 
-		System.out.println("Player moved at position " + move);
+		System.out.println("Player 1 moved at position " + move);
 		updateBoard(move, 1, gameBoard);
 
 	}
