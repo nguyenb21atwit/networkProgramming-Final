@@ -1,39 +1,134 @@
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.net.Socket;
 import java.util.Random;
 import java.util.Scanner;
+import java.net.*;
 
 public class TicTacToeServer {
+	//Tic Tac Toe in Java Tutorial - https://medium.com/codex/tic-tac-toe-e53212028341
 	static int playerScore = 0;
 	static int player2Score = 0;
 	static Scanner input = new Scanner(System.in);
-
+	//Socket Programming in Java Geeks for Geeks - https://www.geeksforgeeks.org/socket-programming-in-java/
+	private Socket socket = null;
+    private ServerSocket serverConnection = null;
+    private DataInputStream in = null;
+    private DataInputStream out = null;
+    private PrintStream sendOut=null;
 	public static void main(String[] args) {
 		char[][] gameBoard = { { '_', '|', '_', '|', '_' }, { '_', '|', '_', '|', '_' }, { ' ', '|', ' ', '|', ' ' } };
-		printBoard(gameBoard);
 		boolean gameOver = false;
 		boolean playAgain = true;
+		boolean singlePlayer=true;
+		System.out.println("Single Player or Two-Player? Enter '1' for Single Player, '2' for Two Player");
+		String gameMode=input.nextLine();
+		switch (gameMode) {
+			case "1":
+			case "One":
+				singlePlayer = true;
+				System.out.println("Single Player Selected");
+				break;
+			case "2":
+			case "Two":
+				singlePlayer = false;
+				System.out.println("Two Player Selected");
+				break;
+		}
+		if(singlePlayer) {
+			printBoard(gameBoard);
+			while (playAgain) {
+				while (!gameOver) {
+					System.out.println("Welcome to Tic Tac Toe!!");
+					playerMove(gameBoard);
+					gameOver = checkGameOver(gameBoard);
+					if (gameOver) {
+						break;
+					}
+					//Add a check here for if Player 2 Disconnects, to have CPU play instead
+					computerMove(gameBoard);
+					gameOver = checkGameOver(gameBoard);
+					if (gameOver) {
+						break;
+					}
+				}
+				System.out.println("Player 1 Score: " + playerScore);
+				System.out.println("Player 2 Score: " + player2Score);
+				System.out.println("Would you like to play again? Enter 'Y' for Yes, 'N' for No.");
+				input.nextLine();
+				String result = input.nextLine();
 
-		while (playAgain) {
-			while (!gameOver) {
-				System.out.println("Welcome to Tic Tac Toe!!");
-				playerMove(gameBoard);
-				gameOver = checkGameOver(gameBoard);
-				if (gameOver) {
+				switch (result) {
+				case "Y":
+				case "y":
+					playAgain = true;
+					System.out.println("Playing again");
+					resetBoard(gameBoard);
+					gameOver = false;
+					printBoard(gameBoard);
+					break;
+
+				case "N":
+				case "n":
+					playAgain = false;
+					System.out.println("Game Over!");
+					break;
+				default:
 					break;
 				}
-				player2Move(gameBoard);
-				gameOver = checkGameOver(gameBoard);
-				if (gameOver) {
-					break;
-					
-				//Add a check here for if Player 2 Disconnects, to have CPU play instead
-				/*computerMove(gameBoard);
-				gameOver = checkGameOver(gameBoard);
-				if (gameOver) {
-					break;*/
+		}
+		}
+		else {
+			System.out.println("Please enter the IP Address");
+			String ipAdd = input.nextLine();
+			System.out.println("Please enter the Port Number");
+			int port = input.nextInt();
+			TicTacToeServer serverSocket = new TicTacToeServer(ipAdd,port);
+			printBoard(gameBoard);
+			while (playAgain) {
+				while (!gameOver) {
+					System.out.println("Welcome to Tic Tac Toe!!");
+					playerMove(gameBoard);
+					gameOver = checkGameOver(gameBoard);
+					if (gameOver) {
+						break;
+					}
+					player2Move(gameBoard);
+					gameOver = checkGameOver(gameBoard);
+					if (gameOver) {
+						break;
+						
+					}
 				}
-			}
-			System.out.println("Player 1 Score: " + playerScore);
-			System.out.println("PLayer 2 Score: " + player2Score);
+				System.out.println("Player 1 Score: " + playerScore);
+				System.out.println("Player 2 Score: " + player2Score);
+				System.out.println("Would you like to play again? Enter 'Y' for Yes, 'N' for No.");
+				input.nextLine();
+				String result = input.nextLine();
+
+				switch (result) {
+				case "Y":
+				case "y":
+					playAgain = true;
+					System.out.println("Playing again");
+					resetBoard(gameBoard);
+					gameOver = false;
+					printBoard(gameBoard);
+					break;
+
+				case "N":
+				case "n":
+					playAgain = false;
+					System.out.println("Game Over!");
+					break;
+				default:
+					break;
+				}
+		}
+			/*System.out.println("Player 1 Score: " + playerScore);
+			System.out.println("Player 2 Score: " + player2Score);
 			System.out.println("Would you like to play again? Enter 'Y' for Yes, 'N' for No.");
 			input.nextLine();
 			String result = input.nextLine();
@@ -55,8 +150,20 @@ public class TicTacToeServer {
 				break;
 			default:
 				break;
-			}
+			}*/
 
+		}
+	}
+	public TicTacToeServer(String ipAddress, int portNum) {
+		try {
+		serverConnection = new ServerSocket(portNum);
+		System.out.println("Starting Server...");
+		System.out.println("Waiting for a Player 2.");
+		socket = serverConnection.accept();
+		System.out.println("Player 2 found!");
+		}
+		catch(IOException i) {
+			System.out.println("Not found "+ i);
 		}
 	}
 
@@ -146,7 +253,7 @@ public class TicTacToeServer {
 	//Program method player2Move to take input from Client and send to Server
 	//Also program to send gameBoard to Client as well
 	public static void player2Move(char[][] gameBoard) {
-
+		
 		System.out.println("Please make a move. (1-9)");
 
 		int move = input.nextInt();
