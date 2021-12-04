@@ -12,7 +12,7 @@ public class TicTacToeServer {
 	static int playerScore = 0;
 	static int player2Score = 0;
 	static Scanner input = new Scanner(System.in);
-	//Socket Programming in Java Geeks for Geeks - https://www.geeksforgeeks.org/socket-programming-in-java/
+	//Geeks for Geeks - Socket Programming in Java - https://www.geeksforgeeks.org/socket-programming-in-java/
 	private Socket socket = null;
     private ServerSocket serverConnection = null;
     private DataInputStream in = null;
@@ -81,11 +81,11 @@ public class TicTacToeServer {
 		}
 		}
 		else {
-			System.out.println("Please enter the IP Address");
-			String ipAdd = input.nextLine();
+			//System.out.println("Please enter the IP Address");
+			//String ipAdd = input.nextLine();
 			System.out.println("Please enter the Port Number");
 			int port = input.nextInt();
-			TicTacToeServer serverSocket = new TicTacToeServer(ipAdd,port);
+			TicTacToeServer serverSocket = new TicTacToeServer(port);
 			printBoard(gameBoard);
 			while (playAgain) {
 				while (!gameOver) {
@@ -154,7 +154,7 @@ public class TicTacToeServer {
 
 		}
 	}
-	public TicTacToeServer(String ipAddress, int portNum) {
+	public TicTacToeServer(int portNum) {
 		try {
 		serverConnection = new ServerSocket(portNum);
 		System.out.println("Starting Server...");
