@@ -12,7 +12,7 @@ public class TicTacToeClient {
 	static Scanner clientScanner = new Scanner(System.in);
 
 	public static void main(String[] args) {
-		System.out.print("Please enter IP Address: ");
+		System.out.print("Please enter IP Address or 'localhost': ");
 		String ipAddress = clientScanner.nextLine();
 		System.out.print("Please enter port: ");
 		int port = clientScanner.nextInt();
@@ -32,6 +32,22 @@ public class TicTacToeClient {
 			// https://gist.github.com/chatton/8955d2f96f58f6082bde14e7c33f69a6
 			while (!socket.isClosed()) {
 				// Input -Brandan
+			
+			    // https://stackoverflow.com/questions/14054828/sending-and-receiving-2d-arrays-java
+			    // this link helped cast
+			    ObjectInputStream is = new ObjectInputStream(socket.getInputStream());
+			    try
+                    {
+                    char[][] gameBoard = (char[][]) is.readObject();  // figure out how to correctly cast this??? - Thomas
+                    System.out.println( gameBoard ) ;
+                    }
+                catch ( ClassNotFoundException e )
+                    {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace() ;
+                    }
+			    
+			    
 				InputStream inputStream = socket.getInputStream();
 				DataInputStream dataInputStream = new DataInputStream(inputStream);
 				String message = dataInputStream.readUTF();

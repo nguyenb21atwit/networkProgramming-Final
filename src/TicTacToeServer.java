@@ -3,6 +3,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream ;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Random;
@@ -264,6 +265,13 @@ public class TicTacToeServer {
 			// Outputs -Brandan
 			OutputStream outputStream = socket.getOutputStream();
 			DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+			
+			// use objectoutput to send array? - thomas
+			ObjectOutputStream os = new ObjectOutputStream(socket.getOutputStream());
+			
+		    os.writeObject( gameBoard );
+			
+			
 			dataOutputStream.writeUTF("Please make a move. (1-9)");
 			dataOutputStream.flush();
 			// Inputs -Brandan
