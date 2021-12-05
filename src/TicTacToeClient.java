@@ -7,26 +7,40 @@ public class TicTacToeClient {
 	private Socket socket = null;
 	private DataInputStream input = null;
 	private DataOutputStream out = null;
+	private static boolean foundPort=false;
+	private static int timeout=200;
 	// Geeks for Geeks, Socket Programming in Java
 	// https://www.geeksforgeeks.org/socket-programming-in-java/
 	static Scanner clientScanner = new Scanner(System.in);
 
 	public static void main(String[] args) {
-		System.out.print("Please enter IP Address or 'localhost': ");
-		String ipAddress = clientScanner.nextLine();
-		System.out.print("Please enter port: ");
-		int port = clientScanner.nextInt();
 		// Creates clientSocket using info given by user -Brandan
-		// Try to implement it so that I can scan a few ports or IP addresses - Brandan
-		// We also need to make it so that it can take input from server and output to
-		// console -Brandan
-		TicTacToeClient clientSocket = new TicTacToeClient(ipAddress, port);
+        // Try to implement it so that I can scan a few ports or IP addresses - Brandan
+        // We also need to make it so that it can take input from server and output to
+        // console -Brandan
+        System.out.print("Please enter IP Address or 'localhost': ");
+        String ipAddress = clientScanner.nextLine();
+        while(foundPort==false) {
+        System.out.print("Please enter port: ");
+        int port = clientScanner.nextInt();
+        //Fastest Way to Scan Ports with Java
+        //https://stackoverflow.com/questions/11547082/fastest-way-to-scan-ports-with-java
+        if(portIsOpen(ipAddress,port, timeout)) {
+            System.out.println("Port is open, connecting...");
+            TicTacToeClient clientSocket = new TicTacToeClient(ipAddress, port);
+            foundPort=true;
+        }
+        else {
+            System.out.println("Port is open not open, try again!");
+            }
+        }
 
-	}
+    }
 
 	public TicTacToeClient(String ipAdd, int portNum) {
 		try {
 			System.out.println("Connected to server!");
+			System.out.println("Welcome to Tic Tac Toe!");
 			socket = new Socket(ipAdd, portNum);
 			// SendStringOverJava -
 			// https://gist.github.com/chatton/8955d2f96f58f6082bde14e7c33f69a6
@@ -74,4 +88,14 @@ public class TicTacToeClient {
 			System.out.println(i);
 		}
 	}
+	public static boolean portIsOpen(String ip, int port, int timeout) {
+        try {
+            Socket socket = new Socket();
+            socket.connect(new InetSocketAddress(ip, port), timeout);
+            socket.close();
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
 }
