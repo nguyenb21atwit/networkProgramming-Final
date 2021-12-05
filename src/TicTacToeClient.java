@@ -1,33 +1,60 @@
 import java.net.*;
 import java.io.*;
 import java.util.Scanner;
+
 public class TicTacToeClient {
 
 	private Socket socket = null;
 	private DataInputStream input = null;
 	private DataOutputStream out = null;
-	//Geeks for Geeks, Socket Programming in Java https://www.geeksforgeeks.org/socket-programming-in-java/
+	// Geeks for Geeks, Socket Programming in Java
+	// https://www.geeksforgeeks.org/socket-programming-in-java/
 	static Scanner clientScanner = new Scanner(System.in);
+
 	public static void main(String[] args) {
-		System.out.println("Please enter IP Address: ");
-		String ipAddress= clientScanner.nextLine();
-		System.out.println("Please enter port: ");
+		System.out.print("Please enter IP Address: ");
+		String ipAddress = clientScanner.nextLine();
+		System.out.print("Please enter port: ");
 		int port = clientScanner.nextInt();
-		//Creates clientSocket using info given by user -Brandan
-		//Try to implement it so that I can scan a few ports or IP addresses - Brandan
-		//We also need to make it so that it can take input from server and output to console -Brandan
+		// Creates clientSocket using info given by user -Brandan
+		// Try to implement it so that I can scan a few ports or IP addresses - Brandan
+		// We also need to make it so that it can take input from server and output to
+		// console -Brandan
 		TicTacToeClient clientSocket = new TicTacToeClient(ipAddress, port);
-		
+
 	}
+
 	public TicTacToeClient(String ipAdd, int portNum) {
 		try {
-			socket=new Socket(ipAdd, portNum);
-			System.out.println("Connected");
-		}
-		catch(UnknownHostException u) {
+			System.out.println("Connected to server!");
+			socket = new Socket(ipAdd, portNum);
+			// SendStringOverJava -
+			// https://gist.github.com/chatton/8955d2f96f58f6082bde14e7c33f69a6
+			while (!socket.isClosed()) {
+				// Input -Brandan
+				InputStream inputStream = socket.getInputStream();
+				DataInputStream dataInputStream = new DataInputStream(inputStream);
+				String message = dataInputStream.readUTF();
+				System.out.println("FROM SERVER: " + message);
+				/*
+				 * BufferedReader fromServer = new BufferedReader(new
+				 * InputStreamReader(socket.getInputStream()));
+				 * System.out.println(fromServer.readLine());
+				 */
+				// Output -Brandan
+				OutputStream outputStream = socket.getOutputStream();
+				DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+
+				input = new DataInputStream(System.in);
+				System.out.println(input);
+				System.out.print("Send to Server a Number (1-9): ");
+				int outputInt = clientScanner.nextInt();
+				dataOutputStream.writeInt(outputInt);
+				dataOutputStream.flush();
+			}
+		} catch (UnknownHostException u) {
 			System.out.println(u);
-		}
-		catch(IOException i){
+		} catch (IOException i) {
 			System.out.println(i);
 		}
 	}
