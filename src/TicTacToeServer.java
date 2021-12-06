@@ -91,7 +91,6 @@ public class TicTacToeServer {
 			int port = input.nextInt();
 			TicTacToeServer serverSocket = new TicTacToeServer(port);
 			printBoard(gameBoard);
-			
 			System.out.println("Welcome to Tic Tac Toe!!");
 			while (playAgain) {
 				while (!gameOver) {

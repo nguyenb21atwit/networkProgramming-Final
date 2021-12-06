@@ -4,10 +4,11 @@ import java.util.Scanner;
 
 public class TicTacToeClient {
 
-	private Socket socket = null;
+	private static Socket socket = null;
 	private DataInputStream input = null;
 	private DataOutputStream out = null;
 	private static boolean foundPort=false;
+	private static boolean portExists=false;
 	private static int timeout=200;
 	// Geeks for Geeks, Socket Programming in Java
 	// https://www.geeksforgeeks.org/socket-programming-in-java/
@@ -23,24 +24,32 @@ public class TicTacToeClient {
         while(foundPort==false) {
         System.out.print("Please enter port: ");
         int port = clientScanner.nextInt();
+        TicTacToeClient clientSocket = new TicTacToeClient(ipAddress, port);
+        if(portExists==false) {
+        	portExists=true;
+        }
+        else {
+        	System.out.println("Connected to server!");
+     		System.out.println("Welcome to Tic Tac Toe!");
+        }
+       
+        /*portIsOpen(ipAddress,port, timeout);
         //Fastest Way to Scan Ports with Java
         //https://stackoverflow.com/questions/11547082/fastest-way-to-scan-ports-with-java
-        if(portIsOpen(ipAddress,port, timeout)) {
+        if(portExists) {
             System.out.println("Port is open, connecting...");
             TicTacToeClient clientSocket = new TicTacToeClient(ipAddress, port);
             foundPort=true;
         }
         else {
             System.out.println("Port is open not open, try again!");
-            }
+            }*/
         }
 
     }
 
 	public TicTacToeClient(String ipAdd, int portNum) {
 		try {
-			System.out.println("Connected to server!");
-			System.out.println("Welcome to Tic Tac Toe!");
 			socket = new Socket(ipAdd, portNum);
 			// SendStringOverJava -
 			// https://gist.github.com/chatton/8955d2f96f58f6082bde14e7c33f69a6
@@ -83,19 +92,22 @@ public class TicTacToeClient {
 				dataOutputStream.flush();
 			}
 		} catch (UnknownHostException u) {
+			System.out.println("found this");
 			System.out.println(u);
 		} catch (IOException i) {
-			System.out.println(i);
+			portExists=false;
+			System.out.println("Port or IP Address does not exist: " +i);
 		}
 	}
-	public static boolean portIsOpen(String ip, int port, int timeout) {
+	/*public static Socket portIsOpen(String ip, int port, int timeout) {
         try {
             Socket socket = new Socket();
             socket.connect(new InetSocketAddress(ip, port), timeout);
-            socket.close();
-            return true;
+            portExists=true;
+            return socket;
         } catch (Exception ex) {
-            return false;
+            portExists=false;
+            return socket;
         }
-    }
+    }*/
 }
