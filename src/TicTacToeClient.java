@@ -7,9 +7,6 @@ public class TicTacToeClient {
 	private static Socket socket = null;
 	private DataInputStream input = null;
 	private DataOutputStream out = null;
-	private static boolean foundPort=false;
-	private static boolean portExists=false;
-	private static int timeout=200;
 	static int playerScore = 0;
 	static int player2Score = 0;
 	// Geeks for Geeks, Socket Programming in Java
@@ -20,39 +17,37 @@ public class TicTacToeClient {
 		char[][] gameBoard = { { '_', '|', '_', '|', '_' }, { '_', '|', '_', '|', '_' }, { ' ', '|', ' ', '|', ' ' } };
 		boolean gameOver = false;
 		boolean playAgain = true;
-		// Creates clientSocket using info given by user -Brandan
-        // Try to implement it so that I can scan a few ports or IP addresses - Brandan
-        // We also need to make it so that it can take input from server and output to
-        // console -Brandan
-        System.out.print("Please enter IP Address or 'localhost': ");
-        String ipAddress = clientScanner.nextLine();
-        System.out.print("Please enter port: ");
-        int port = clientScanner.nextInt();
-        TicTacToeClient clientSocket = new TicTacToeClient(ipAddress, port);
-        	System.out.println("Connected to server!");
-      		printBoard(gameBoard);
-			System.out.println("Welcome to Tic Tac Toe!!");
-			while(playAgain) {
-				while (!gameOver) {
-					player1Move(gameBoard);
-					gameOver = checkGameOver(gameBoard);
-					if (gameOver) {
-						break;
-					}
-					player2Move(gameBoard);
-					gameOver = checkGameOver(gameBoard);
-					if (gameOver) {
-						break;
-					}
+		System.out.print("Please enter IP Address or 'localhost': ");
+		String ipAddress = clientScanner.nextLine();
+		// Creates a new Socket to connect to Host
+		TicTacToeClient clientSocket = new TicTacToeClient(ipAddress, clientScanner);
+		System.out.println("Connected to server!");
+		printBoard(gameBoard);
+		System.out.println("Welcome to Tic Tac Toe!!");
+		// Plays game, calling turns until the game is over and host ends
+		while (playAgain) {
+			while (!gameOver) {
+				player1Move(gameBoard);
+				gameOver = checkGameOver(gameBoard);
+				if (gameOver) {
+					break;
 				}
-				System.out.println("Player 1 Score: " + playerScore);
-				System.out.println("Player 2 Score: " + player2Score);
-				System.out.println("Waiting for Host to Restart or End Game.");
-				try {
+				player2Move(gameBoard);
+				gameOver = checkGameOver(gameBoard);
+				if (gameOver) {
+					break;
+				}
+			}
+			System.out.println("Player 1 Score: " + playerScore);
+			System.out.println("Player 2 Score: " + player2Score);
+			System.out.println("Waiting for Host to Restart or End Game.");
+			try {
+				// Receives int from Host to determine replay/end game
 				InputStream inputStream = socket.getInputStream();
 				DataInputStream dataInputStream = new DataInputStream(inputStream);
 				int replayHost = dataInputStream.readInt();
-				String result=checkPlayAgain(replayHost);
+				// Passes int to change to String cases
+				String result = checkPlayAgain(replayHost);
 				switch (result) {
 				case "Y":
 				case "y":
@@ -66,49 +61,36 @@ public class TicTacToeClient {
 				case "N":
 				case "n":
 					playAgain = false;
-					System.out.println("Game Over!");
+					System.out.println("Host Ended Session. Game Over!");
 					break;
 				default:
 					break;
-					}
 				}
-				catch(IOException z) {
-					System.out.println("Error "+z);
-				}
+			} catch (IOException z) {
+				System.out.println("Unknown Error " + z);
 			}
-	}
-        /*portIsOpen(ipAddress,port, timeout);
-        //Fastest Way to Scan Ports with Java
-        //https://stackoverflow.com/questions/11547082/fastest-way-to-scan-ports-with-java
-        if(portExists) {
-            System.out.println("Port is open, connecting...");
-            TicTacToeClient clientSocket = new TicTacToeClient(ipAddress, port);
-            foundPort=true;
-        }
-        else {
-            System.out.println("Port is open not open, try again!");
-            }*/
-        
-
-
-	public TicTacToeClient(String ipAdd, int portNum) {
-		try {
-			socket = new Socket(ipAdd, portNum);
-		} catch (UnknownHostException u) {
-			System.out.println("found this");
-			System.out.println(u);
-		} catch (IOException i) {
-			System.out.println("Port or IP Address does not exist: " +i);
 		}
 	}
-	
+
+	public TicTacToeClient(String ipAdd, Scanner clientScanner) {
+		try {
+			System.out.print("Please enter port: ");
+			int port = clientScanner.nextInt();
+			socket = new Socket(ipAdd, port);
+		} catch (UnknownHostException u) {
+			System.out.println("IP Address does not exist, restart client, try again");
+			System.exit(0);
+		} catch (IOException i) {
+			System.out.println("Port does not exist, try again");
+			TicTacToeClient clientSocket = new TicTacToeClient(ipAdd, clientScanner);
+		}
+	}
+
 	public static void player2Move(char[][] gameBoard) {
+		//Player 2's move
 		System.out.println("Please make a move. (1-9)");
-
 		int move = clientScanner.nextInt();
-
 		boolean result = checkValidMove(move, gameBoard);
-
 		while (!result) {
 			System.out.println("Sorry! Invalid Move. Try again");
 			move = clientScanner.nextInt();
@@ -117,35 +99,32 @@ public class TicTacToeClient {
 		System.out.println("Player 2 moved at position " + move);
 		updateBoard(move, 2, gameBoard);
 		try {
-		OutputStream outputStream = socket.getOutputStream();
-		DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-		//dataOutputStream.writeUTF("Please make a move. (1-9)");
-		//dataOutputStream.flush();
-		dataOutputStream.writeInt( move );
-		dataOutputStream.flush();
+			// Outputs to the Host - Player 2's move
+			OutputStream outputStream = socket.getOutputStream();
+			DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+			dataOutputStream.writeInt(move);
+			dataOutputStream.flush();
+		} catch (IOException x) {
+			System.out.println("Unknown Error at Line 262 " + x);
 		}
-		catch(IOException x) {
-			System.out.println("Unknown Error at Line 262 "+ x);
-		}
-
 	}
-	
+
 	public static void player1Move(char[][] gameBoard) {
 		try {
+			//Player 1's moves
 			System.out.println("Waiting for Player 1 to make a move. (1-9)");
-			// Inputs -Brandan
-						InputStream inputStream = socket.getInputStream();
-						DataInputStream dataInputStream = new DataInputStream(inputStream);
-						int move = dataInputStream.readInt();
-						System.out.println("Player 1 moved at position " + move);
-						updateBoard(move, 1, gameBoard);
+			// Inputs from the Host - Player 1's moves
+			InputStream inputStream = socket.getInputStream();
+			DataInputStream dataInputStream = new DataInputStream(inputStream);
+			int move = dataInputStream.readInt();
+			System.out.println("Player 1 moved at position " + move);
+			updateBoard(move, 1, gameBoard);
 		} catch (IOException i) {
 			System.out.println("Error " + i);
 		}
 	}
-	
-	public static void printBoard(char[][] gameBoard) {
 
+	public static void printBoard(char[][] gameBoard) {
 		for (char[] line : gameBoard) {
 			for (char x : line) {
 				System.out.print(x);
@@ -153,8 +132,7 @@ public class TicTacToeClient {
 			System.out.println();
 		}
 	}
-	
-	
+
 	public static boolean checkValidMove(int move, char[][] gameBoard) {
 
 		switch (move) {
@@ -217,9 +195,8 @@ public class TicTacToeClient {
 		default:
 			return false;
 		}
-
 	}
-	
+
 	public static void updateBoard(int position, int player, char[][] gameBoard) {
 
 		char character;
@@ -274,15 +251,15 @@ public class TicTacToeClient {
 		}
 
 	}
+
 	public static String checkPlayAgain(int n) {
-		if(n==1) {
+		if (n == 1) {
 			return "Y";
-		}
-		else {
+		} else {
 			return "N";
 		}
 	}
-	
+
 	public static void resetBoard(char[][] gameBoard) {
 		gameBoard[0][0] = '_';
 		gameBoard[0][2] = '_';
@@ -294,7 +271,7 @@ public class TicTacToeClient {
 		gameBoard[2][2] = ' ';
 		gameBoard[2][4] = ' ';
 	}
-	
+
 	public static boolean checkGameOver(char[][] gameBoard) {
 
 		// Checks for Horizontal Win
@@ -393,18 +370,6 @@ public class TicTacToeClient {
 			System.out.println("Its a tie");
 			return true;
 		}
-
 		return false;
 	}
-	/*public static Socket portIsOpen(String ip, int port, int timeout) {
-        try {
-            Socket socket = new Socket();
-            socket.connect(new InetSocketAddress(ip, port), timeout);
-            portExists=true;
-            return socket;
-        } catch (Exception ex) {
-            portExists=false;
-            return socket;
-        }
-    }*/
 }

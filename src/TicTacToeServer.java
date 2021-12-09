@@ -3,7 +3,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream ;
+import java.io.ObjectOutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Random;
@@ -44,6 +44,7 @@ public class TicTacToeServer {
 			System.out.println("Two Player Selected");
 			break;
 		}
+		// Single Player with CPU
 		if (singlePlayer) {
 			printBoard(gameBoard);
 			System.out.println("Welcome to Tic Tac Toe!!");
@@ -54,7 +55,6 @@ public class TicTacToeServer {
 					if (gameOver) {
 						break;
 					}
-					// Add a check here for if Player 2 Disconnects, to have CPU play instead
 					computerMove(gameBoard);
 					gameOver = checkGameOver(gameBoard);
 					if (gameOver) {
@@ -87,11 +87,14 @@ public class TicTacToeServer {
 				}
 			}
 		} else {
+			// Server indicates the Port it wants to use
 			System.out.print("Please enter the Port Number: ");
 			int port = input.nextInt();
+			// Creates Socket
 			TicTacToeServer serverSocket = new TicTacToeServer(port);
 			printBoard(gameBoard);
 			System.out.println("Welcome to Tic Tac Toe!!");
+			// Plays turns until game is over
 			while (playAgain) {
 				while (!gameOver) {
 					playerMove(gameBoard);
@@ -120,12 +123,11 @@ public class TicTacToeServer {
 					gameOver = false;
 					printBoard(gameBoard);
 					try {
-					OutputStream outputStream = socket.getOutputStream();
-					DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-					dataOutputStream.writeInt(1);
-					dataOutputStream.flush();
-					}
-					catch (IOException t) {
+						OutputStream outputStream = socket.getOutputStream();
+						DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+						dataOutputStream.writeInt(1);
+						dataOutputStream.flush();
+					} catch (IOException t) {
 						System.out.println("Error" + t);
 					}
 					break;
@@ -139,30 +141,14 @@ public class TicTacToeServer {
 						DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
 						dataOutputStream.writeInt(0);
 						dataOutputStream.flush();
-						}
-						catch (IOException z) {
-							System.out.println("Error" + z);
-						}
+					} catch (IOException z) {
+						System.out.println("Error" + z);
+					}
 					break;
 				default:
 					break;
 				}
 			}
-
-			/*
-			 * System.out.println("Player 1 Score: " + playerScore);
-			 * System.out.println("Player 2 Score: " + player2Score); System.out.
-			 * println("Would you like to play again? Enter 'Y' for Yes, 'N' for No.");
-			 * input.nextLine(); String result = input.nextLine();
-			 * 
-			 * switch (result) { case "Y": case "y": playAgain = true;
-			 * System.out.println("Playing again"); resetBoard(gameBoard); gameOver = false;
-			 * printBoard(gameBoard); break;
-			 * 
-			 * case "N": case "n": playAgain = false; System.out.println("Game Over!");
-			 * break; default: break; }
-			 */
-
 		}
 	}
 
@@ -173,38 +159,26 @@ public class TicTacToeServer {
 			System.out.println("Waiting for a Player 2.");
 			socket = serverConnection.accept();
 			System.out.println("Player 2 found!");
-			/*
-			 * InputStream inputStream = socket.getInputStream(); DataInputStream
-			 * dataInputStream = new DataInputStream(inputStream); String message =
-			 * dataInputStream.readUTF(); System.out.println("Client Message: "+message);
-			 */
 		} catch (IOException i) {
 			System.out.println("Not found " + i);
 		}
 	}
-	public static void playerMoveSingle(char[][] gameBoard){
 
-	    System.out.println("Please make a move. (1-9)");
-
-
-	    int move = input.nextInt();
-
-	    boolean result = checkValidMove(move,gameBoard);
-
-	    while(!result){
-	        System.out.println("Sorry! Invalid Move. Try again");
-	        move = input.nextInt();
-	        result = checkValidMove(move,gameBoard);
-	    }
-
-	    System.out.println("Player moved at position " + move);
-	    updateBoard(move,1,gameBoard);
-
-
+	// Different Player Move method for Single Player
+	public static void playerMoveSingle(char[][] gameBoard) {
+		System.out.println("Please make a move. (1-9)");
+		int move = input.nextInt();
+		boolean result = checkValidMove(move, gameBoard);
+		while (!result) {
+			System.out.println("Sorry! Invalid Move. Try again");
+			move = input.nextInt();
+			result = checkValidMove(move, gameBoard);
+		}
+		System.out.println("Player moved at position " + move);
+		updateBoard(move, 1, gameBoard);
 	}
 
 	public static void printBoard(char[][] gameBoard) {
-
 		for (char[] line : gameBoard) {
 			for (char x : line) {
 				System.out.print(x);
@@ -213,24 +187,14 @@ public class TicTacToeServer {
 		}
 	}
 
-	/*
-	 * public static String charToString(char[][] Board) { String s = ""; for (int
-	 * i=0; i < Board.length; i++) { for (int j=0; j < Board[i].length; j++) { s +=
-	 * Board[i][j]; } } return s.toString(); }
-	 */
-
 	public static void updateBoard(int position, int player, char[][] gameBoard) {
-
 		char character;
-
 		if (player == 1) {
 			character = 'X';
 		} else {
 			character = 'O';
 		}
-
 		switch (position) {
-
 		case 1:
 			gameBoard[0][0] = character;
 			printBoard(gameBoard);
@@ -269,59 +233,45 @@ public class TicTacToeServer {
 			break;
 		default:
 			break;
-
 		}
 
 	}
-
+	
 	public static void playerMove(char[][] gameBoard) {
-
+		//Player 1's move
 		System.out.println("Please make a move. (1-9)");
-
 		int move = input.nextInt();
-
 		boolean result = checkValidMove(move, gameBoard);
-
 		while (!result) {
 			System.out.println("Sorry! Invalid Move. Try again");
 			move = input.nextInt();
 			result = checkValidMove(move, gameBoard);
 		}
-		
+
 		System.out.println("Player 1 moved at position " + move);
 		updateBoard(move, 1, gameBoard);
 		try {
-		OutputStream outputStream = socket.getOutputStream();
-		DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-		
-		//dataOutputStream.writeUTF("Please make a move. (1-9)");
-		//dataOutputStream.flush();
-		dataOutputStream.writeInt(move);
-		dataOutputStream.flush();
-		//final DataOutputStream OutToClient = new DataOutputStream(socket.getOutputStream());
-		/*OutToClient.writeUTF("Please make a move. (1-9)");
-		OutToClient.flush();
-		OutToClient.writeInt(move);
-		OutToClient.flush();*/
-		}
-		catch(IOException x) {
-			System.out.println("Unknown Error at Line 284 "+ x);
+			// Output to Client
+			OutputStream outputStream = socket.getOutputStream();
+			DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+			dataOutputStream.writeInt(move);
+			dataOutputStream.flush();
+		} catch (IOException x) {
+			System.out.println("Unknown Error at Line 284 " + x);
 		}
 
 	}
 
-	// Program method player2Move to take input from Client and send to Server
-	// Also program to send gameBoard to Client as well
 	public static void player2Move(char[][] gameBoard) {
 		try {
 			System.out.println("Waiting for Player 2 to make a move. (1-9)");
 			// SendStringOverJava -
 			// https://gist.github.com/chatton/8955d2f96f58f6082bde14e7c33f69a6
-			// Inputs -Brandan
+			// Inputs from Client - Player 2's move
 			InputStream inputStream = socket.getInputStream();
 			DataInputStream dataInputStream = new DataInputStream(inputStream);
 			int intFromClient = dataInputStream.readInt();
-			System.out.println("Player 2 Move: " + intFromClient);
+			System.out.println("Player 2 moved at position " + intFromClient);
 			updateBoard(intFromClient, 2, gameBoard);
 		} catch (IOException i) {
 			System.out.println("Error " + i);
