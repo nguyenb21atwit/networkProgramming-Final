@@ -12,6 +12,6 @@ For our Network Programming Final, we programmed the classic game of Tic-Tac-Toe
 ### DEMO VIDEO
 [Demo Video](https://youtu.be/PWBXR2ggYSo)
 ### Team Members
-Brandan Nguyen, Team Lead
-Thomas Michael
-Bill Pan
+- Brandan Nguyen, Team Lead
+- Thomas Michael
+- Bill Pan
